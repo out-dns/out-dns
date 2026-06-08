@@ -1,49 +1,52 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useEffect, useRef, useState } from "react";
+
+import HMenu from "./components/buttons/HMenu";
+import MenuLayout from "./components/menu/Layout";
+import ClearCacheButton from "./components/buttons/ClearCacheButton";
+import SetDNSButton from "./components/buttons/SetDNSButton";
+import NetworkInterfaces from "./components/comboBox/network-interfaces";
+import DnsServersInp from "./components/input/dns-servers-inp";
+import TitleBar from "./components/titlebar/titlebar";
+import DnsList from "./components/dns/dns-servers";
+
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [menuStatus, setMenuStatus] = useState(false); 
+  const [logContent, setLogContent] = useState<string[]>([]);
+  const logRef = useRef<HTMLTextAreaElement>(null);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  function log(message: string){
+    setLogContent(prev => [...prev , new Date().toLocaleTimeString() + " | " + message]);
   }
+  useEffect(()=>{
+    if(logRef.current){
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  });
+
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <main className="bg-[#1f2023] overflow-hidden min-w-screen min-h-screen">
+      <TitleBar></TitleBar>
+      <HMenu setMenuStatus={setMenuStatus}></HMenu>
+      <MenuLayout menuStatus={menuStatus} setMenuStatus={setMenuStatus}></MenuLayout>
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <NetworkInterfaces></NetworkInterfaces>
+
+      <DnsList></DnsList>
+
+      <DnsServersInp></DnsServersInp>
+
+      <div className="absolute bottom-5 right-5 flex flex-col gap-4 text-white">
+        <SetDNSButton></SetDNSButton>
+        <ClearCacheButton log={log}></ClearCacheButton>
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
+      <div className="w-[350px] h-[100px] bg-[#363636] p-0 m-0 rounded-md absolute bottom-5 left-5 overflow-hidden">
+          <div className="w-[300px] h-[300px] border-[#1f2023] border-[20px] rounded-full top-[20px] left-[80px] absolute"></div>
+          <textarea name="log" id="log" placeholder="logs..." className="resize-none outline-none border-0 p-2 absolute inset-0 overflow-y-auto overflow-x-hidden bg-transparent text-[#ccc] z-10 w-full h-full scrollbar-thumb-transparent scroll-smooth font-mono text-[0.8rem]" readOnly value={logContent.join('\n')} ref={logRef}></textarea>
+      </div>
+
     </main>
   );
 }
