@@ -2,6 +2,7 @@ use rusqlite::{Connection};
 use tauri::Manager;
 use std::sync::Mutex;
 
+
 pub struct DbState(pub Mutex<Connection>);
 
 pub fn init_db(app: &tauri::AppHandle) -> Connection{
@@ -14,12 +15,24 @@ pub fn init_db(app: &tauri::AppHandle) -> Connection{
 
     conn.execute_batch("
         CREATE TABLE IF NOT EXISTS dns_entries (
-            id    INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT    NOT NULL,
-            Primary_dns TEXT    NOT NULL,
-            Secondary_dns  TEXT    NOT NULL
+            id              INTEGER     PRIMARY     KEY     AUTOINCREMENT,
+            name            TEXT        NOT NULL,
+            primary_dns     TEXT        NOT NULL,
+            secondary_dns   TEXT        NOT NULL,
+            display_order           INTEGER     NOT NULL
+            );
+        CREATE TABLE IF NOT EXISTS configs (
+            id                      INTEGER     PRIMARY     KEY     AUTOINCREMENT,
+            flush_dns_on_change     INTEGER NOT NULL DEFAULT 1,
+            run_on_start            INTEGER NOT NULL DEFAULT 0,
+            minimize_to_tray        INTEGER NOT NULL DEFAULT 0,
+            close_to_tray           INTEGER NOT NULL DEFAULT 0
         );
-    ").expect("failed to create tables");
+        INSERT OR IGNORE INTO configs (id, flush_dns_on_change, run_on_start, minimize_to_tray, close_to_tray) VALUES (1, 1, 0, 0, 0);
+        INSERT OR IGNORE INTO dns_entries (id, name, primary_dns, secondary_dns, display_order) VALUES (1, 'cloudflare', '1.1.1.1', '1.0.0.1', 1);
+        INSERT OR IGNORE INTO dns_entries (id, name, primary_dns, secondary_dns, display_order) VALUES (2, 'google', '8.8.8.8', '8.8.4.4', 2);
+    ").expect("failed to configure database");
 
-    return conn;
+
+    conn
 }

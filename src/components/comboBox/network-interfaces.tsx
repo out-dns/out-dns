@@ -1,12 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
-import { MouseEventHandler, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import arrow from "./../../assets/arrow.png";
 
-export default function NetworkInterfaces(){
+export default function NetworkInterfaces({selectedInterface, setSelectedInterface}: {selectedInterface: string, setSelectedInterface: React.Dispatch<React.SetStateAction<string>>}){
     const [networkInterfaces, setNetworkInterfaces] = useState<string[]>([]);
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [selectedInterface, setSelectedInterface] = useState<string>("All Networks");
 
 
     useEffect(()=>{
@@ -17,7 +16,7 @@ export default function NetworkInterfaces(){
 
     return(
         <div className="w-[15rem] h-10 flex justify-end absolute top-10 left-12 z-20 select-none">
-            <div id="network-interfaces" className="rounded-[4px] border-[1px] border-[#0000008c] px-1 text-[#ffffffa8] text-[0.9rem] drop-shadow-2xl outline-0 w-full h-7 flex items-center" onClick={()=>{setIsOpen(prev => !(isOpen))}}>
+            <div id="network-interfaces" className="rounded-[4px] border-[1px] border-[#0000008c] px-1 text-[#ffffffa8] text-[0.9rem] drop-shadow-2xl outline-0 w-full h-7 flex items-center" onClick={()=>{setIsOpen(prev => !(prev))}}>
                 <div className="absolute top-0 right-1 flex justify-center items-center w-5 h-full ">
                     <img className={(isOpen ? "-rotate-90 " : "rotate-0 ") + "w-4 h-4 duration-200 ease-in-out"} src={arrow} alt="arrow"/>
                 </div>
@@ -28,10 +27,10 @@ export default function NetworkInterfaces(){
                     <div className="w-[1px] h-full bg-[#09ff008a] rounded-full"></div>
                     <p className="cursor-default hover:pl-2 hover:text-[#2052a8] duration-200 ease-in-out" onClick={()=>{setSelectedInterface("All Networks"); setIsOpen(false)}}>All Networks</p>
                 </div>
-                {networkInterfaces.map((iface) => (
+                {networkInterfaces.map((iface,i) => (
                     <div className="relative w-full h-fit flex flex-row gap-1">
                         <div className="w-[1px] h-full bg-[#005eff8a] rounded-full"></div>
-                        <p key={iface} className="cursor-default hover:pl-2 hover:text-[#2052a8] duration-200 ease-in-out truncate min-h-fit" onClick={()=>{setSelectedInterface(iface); setIsOpen(false)}}>{iface}</p>
+                        <p key={i} className="cursor-default hover:pl-2 hover:text-[#2052a8] duration-200 ease-in-out truncate min-h-fit" onClick={()=>{setSelectedInterface(iface); setIsOpen(false)}}>{iface}</p>
                     </div>
                 ))}
             </div>

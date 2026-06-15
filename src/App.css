@@ -1,1 +1,25 @@
 @import "tailwindcss";
+@font-face {
+    font-family: "f1";
+    src: url(assets/fonts/WinkySans-VariableFont_wght.ttf);
+}
+@font-face {
+    font-family: "f2";
+    src: url(assets/fonts/Iceberg-Regular.ttf);
+}
+@font-face {
+    font-family: "f3";
+    src: url(assets/fonts/MartelSans-Regular.ttf);
+}
+@font-face {
+    font-family: "f4";
+    src: url(assets/fonts/Sriracha-Regular.ttf);
+}
+@font-face {
+    font-family: "f5";
+    src: url(assets/fonts/Audiowide-Regular.ttf);
+}
+
+p{
+    font-family: "f3", sans-serif;
+}
