@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import init_tray from "./lib/tray";
 import HMenu from "./components/buttons/HMenu";
 import MenuLayout from "./components/menu/Layout";
 import ClearCacheButton from "./components/buttons/ClearCacheButton";
@@ -9,24 +10,29 @@ import DnsServersInp from "./components/input/dns-servers-inp";
 import TitleBar from "./components/titlebar/titlebar";
 import DnsList from "./components/comboBox/dns-servers";
 import { useLog } from "./contexts/logContext";
-
+import { usePopup } from "./contexts/popupContext";
 function App() {
   const [isElevated, setIsElevated] = useState<boolean>(true);
   interface SelectedDns{
-      name: string;
-      primary: string;
-      secondary: string;
+    name: string;
+    primary: string;
+    secondary: string;
   }
   const [selectedDns, setSelectedDns] = useState<SelectedDns>({name: "Default DNS", primary: "", secondary: ""});
   const [selectedInterface, setSelectedInterface] = useState<string>("All Networks");
-
+  
   const [primaryDns, setPrimaryDns] = useState<string>("");
   const [secondaryDns, setSecondaryDns] = useState<string>("");
-
+  
   const [menuStatus, setMenuStatus] = useState(false); 
   const logRef = useRef<HTMLTextAreaElement>(null);
-  const {logContent} = useLog();
+  const {logContent,log} = useLog();
+  const {showPopup} = usePopup();
 
+  useEffect(()=>{
+    init_tray(log,showPopup).catch((err) => console.error("Failed to init tray:", err));
+  },[]);
+  
   useEffect(() => {
     setPrimaryDns(selectedDns.primary);
     setSecondaryDns(selectedDns.secondary);

@@ -15,14 +15,15 @@ export default function SetDNSButton({
     const {log} = useLog();
 
     const set_dns = () => {
+        log("processing... ⏳");
         invoke<string>("set_dns",{interface: selectedInterface,primary: primaryDns,secondary: secondaryDns})
-        .then((result)=>{
+        .then(()=>{
             showPopup("success");
-            log(`${result} ✅`);
+            log(`DNS applied for ${selectedInterface} ✅`);
         })
-        .catch((error)=>{
+        .catch(()=>{
             showPopup("warning");
-            log(`${error} ❌`);
+            log(`failed to apply DNS for ${selectedInterface} ❌`);
         });
 
     }

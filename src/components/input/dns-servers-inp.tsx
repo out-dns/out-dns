@@ -28,7 +28,7 @@ export default function DnsServersInp({
     const lookupDns = ()=>{
         setPrimaryLookup("testing...");
         setSecondaryLookup("testing...");
-
+        // lookup primary dns
         invoke<number>("resolve", {dnsServer: primaryDns})
         .then((result)=>{
             setPrimaryLookup(`${result} ms`);
@@ -37,6 +37,7 @@ export default function DnsServersInp({
             log(error);
             setPrimaryLookup("0 ms");
         });
+        // lookup secondary dns
         invoke<number>("resolve", {dnsServer: secondaryDns})
         .then((result)=>{
             setSecondaryLookup(`${result} ms`);

@@ -6,15 +6,16 @@ export default function ClearCacheButton(){
     const {showPopup} = usePopup();
     const {log} = useLog();
     const handler = async ()=>{
-        log("processing the command...");
-        try {
-            const result = await invoke<string>("flush_dns");
-            log(`${result} ✅`);
-            showPopup("success");
-        } catch (error) {
-            log(`${error} ❌`);
-            showPopup("warning");
-        }
+        log("processing... ⏳");
+            invoke<string>("flush_dns")
+            .then(()=>{
+                showPopup("success");
+                log(`${"DNS flushed"} ✅`);
+            })
+            .catch(()=>{
+                showPopup("warning");
+                log(`${"failed to flush dns"} ❌`);
+            });
     }
     return(
         

@@ -47,6 +47,6 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export function usePopup() {
+export function usePopup(){
     return useContext(PopupContext);
 }

@@ -20,52 +20,49 @@ export default function DNS(){
     const [firstAddress, setFirstAddress] = useState<string>("");
     const [secondAddress, setSecondAddress] = useState<string>("");
 
-    async function save(name: string, f: string,s: string){
-        if(name.length < 1 || f.length < 7 || s.length < 7 ){
+    function insert(name: string, primary: string, secondary: string){
+        if(name.length < 1 || primary.length < 7 || secondary.length < 7 ){
             log("invalid DNS data ❌");
             return showPopup("warning");
         }
         
-        try {
-            invoke<string>("new_dns",{name: name, address1: f , address2: s})
-            .then(result => {
-                showPopup("success");
-                log(`${result} ✅`);
-                setDnsName("");
-                setFirstAddress("");
-                setSecondAddress("");
-            });
-        } catch (error) {
+        invoke<string>("new_dns",{name: name, primary: primary, secondary: secondary})
+        .then(result => {
+            showPopup("success");
+            log(`${result} ✅`);
+            setDnsName("");
+            setFirstAddress("");
+            setSecondAddress("");
+        })
+        .catch(()=>{
             showPopup("warning");
-            log(`${error} ❌`);
-        }
+            log(`failed to insert DNS ❌`);
+        });
     }
 
-    async function fetchDns() {
-        try {
-            invoke<DnsEntry[]>("get_dns_from_db")
-            .then(result => {
-                return setDnsList(result);
-            });
-        } catch (error) {
-            log(`${error} ❌`);
-        }
-    }
+    function fetchDns() {
+        invoke<DnsEntry[]>("get_dns_from_db")
+        .then(result => {
+            setDnsList(result);
+        }).catch(()=>{
+            log(`failed to fetch DNS list ❌`);
+        });
 
+    }
     useEffect(()=>{
         fetchDns();
     });
 
-    async function removeDns(id: number) {
-        try {
-            invoke<string>("remove_dns", {id: id})
-            .then(()=>{
-                fetchDns();
-            });
-        } catch (error) {
-            log(`${error} ❌`);
-        }
+    function removeDns(id: number) {
+        invoke<string>("remove_dns", {id: id})
+        .then(()=>{
+            fetchDns();
+        })
+        .catch(()=>{
+            log(`failed to remove DNS ❌`);
+        });
     }
+    
     return(
         <div className="w-full h-full flex flex-col items-center p-5 gap-4">
             <div className="w-full max-w-[25rem] h-36 rounded-md bg-[#1f2023] border border-[#2c2c2c] drop-shadow-2xl overflow-hidden relative overflow-x-hidden overflow-y-scroll scrollbar-none">
@@ -97,7 +94,7 @@ export default function DNS(){
                     </div>
                 </div>
                 <div className="flex flex-col justify-end gap-2 font-[f1]">
-                    <button onClick={()=>{save(dnsName, firstAddress, secondAddress)}} className="w-36 h-11 bg-[#2052a8] rounded-md text-center drop-shadow-2xl border border-[#1f20239f]">Add</button>
+                    <button onClick={()=>{insert(dnsName, firstAddress, secondAddress)}} className="w-36 h-11 bg-[#2052a8] rounded-md text-center drop-shadow-2xl border border-[#1f20239f]">Add</button>
                     <button onClick={()=>{setDnsName(""); setFirstAddress(""); setSecondAddress("")}} className="w-36 h-11 bg-[#2052a8] rounded-md text-center drop-shadow-2xl border border-[#1f20239f]">clear</button>
                 </div>
             </div>
