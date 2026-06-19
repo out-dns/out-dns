@@ -1,6 +1,6 @@
-use super::interface::{get_interface_guid_by_name};
 use super::config;
 use super::config::Configs;
+use super::interface::get_interface_guid_by_name;
 use crate::handlers::database::DbState;
 use crate::handlers::interface::get_network_interfaces;
 use hickory_resolver::{
@@ -12,12 +12,11 @@ use serde::{Deserialize, Serialize};
 use std::os::windows::process::CommandExt;
 use std::time::Instant;
 use tauri_plugin_log::log;
+use windows::core::PWSTR;
 use windows::Win32::NetworkManagement::IpHelper::{
     SetInterfaceDnsSettings, DNS_INTERFACE_SETTINGS, DNS_INTERFACE_SETTINGS_VERSION1,
     DNS_SETTING_NAMESERVER,
 };
-use windows::core::{PWSTR};
-
 
 #[tauri::command]
 pub fn flush_dns() -> Result<(), ()> {
@@ -64,10 +63,10 @@ pub struct DnsEntries {
 }
 #[tauri::command]
 pub fn get_dns_from_db(state: tauri::State<DbState>) -> Result<Vec<DnsEntries>, ()> {
-    let db = state.0.lock().map_err(|e| {log::error!("{}", e)})?;
+    let db = state.0.lock().map_err(|e| log::error!("{}", e))?;
     let mut stmt = db
         .prepare("SELECT * FROM dns_entries ORDER BY display_order")
-        .map_err(|e| {log::error!("{}", e)})?;
+        .map_err(|e| log::error!("{}", e))?;
 
     let result = stmt
         .query_map([], |row| {
@@ -79,7 +78,7 @@ pub fn get_dns_from_db(state: tauri::State<DbState>) -> Result<Vec<DnsEntries>, 
                 display_order: row.get(4)?,
             })
         })
-        .map_err(|e| {log::error!("{}", e)})?
+        .map_err(|e| log::error!("{}", e))?
         .filter_map(|r| r.ok())
         .collect();
 
@@ -137,6 +136,11 @@ pub async fn set_dns(
     secondary: &str,
     state: tauri::State<'_, DbState>,
 ) -> Result<(), String> {
+    let valid = validate_dns(primary, secondary);
+    if !valid {
+        return Err("invalid DNS ip address".to_string());
+    }
+
     let servers = if primary.is_empty() && secondary.is_empty() {
         String::new()
     } else if secondary.is_empty() {
@@ -154,43 +158,79 @@ pub async fn set_dns(
         ..Default::default()
     };
 
-    let mut failure: Vec<&str> = vec![]; 
+    let mut failure: Vec<&str> = vec![];
 
     if interface == "All Networks" {
-        let interfaces = get_network_interfaces().map_err(|e| {log::error!("{}", e); e})?;
+        let interfaces = get_network_interfaces().map_err(|e| {
+            log::error!("{}", e);
+            e
+        })?;
         for i in &interfaces {
-            let guid = get_interface_guid_by_name(i).map_err(|e| {log::error!("{}", e); e})?;
-            let result = unsafe {
-                SetInterfaceDnsSettings(guid, &settings)
-            };
+            let guid = get_interface_guid_by_name(i).map_err(|e| {
+                log::error!("{}", e);
+                e
+            })?;
+            let result = unsafe { SetInterfaceDnsSettings(guid, &settings) };
             if result.is_err() {
                 log::error!("failed to set dns error code: {:?}", result);
                 failure.push(i);
             }
         }
         if failure.len() > 0 {
-            return Err(format!("set dns failed for {} times on {:?}", failure.len(), failure));
+            return Err(format!(
+                "set dns failed for {} times on {:?}",
+                failure.len(),
+                failure
+            ));
         }
-    }else {
-        let guid = get_interface_guid_by_name(interface).map_err(|e| {log::error!("{}", e); e})?;
-        let result = unsafe {
-            SetInterfaceDnsSettings(guid, &settings)
-        };
+    } else {
+        let guid = get_interface_guid_by_name(interface).map_err(|e| {
+            log::error!("{}", e);
+            e
+        })?;
+        let result = unsafe { SetInterfaceDnsSettings(guid, &settings) };
         if result.is_err() {
             log::error!("failed to set dns error code: {:?}", result);
-            return Err("failed".to_string());
+            return Err(format!("failed to set DNS for {}", interface));
         }
     }
 
     // flush dns on change based on app configuration
-    let configs: Configs = config::get_configs(state).map_err(|e| {log::error!("{}", e); e})?;
+    let configs: Configs = config::get_configs(state).map_err(|e| {
+        log::error!("{}", e);
+        e
+    })?;
     if configs.flush_dns_on_change {
-        flush_dns().map_err(|e| {log::error!("{:?}", e); "failed to flush dns"})?;
+        flush_dns().map_err(|e| {
+            log::error!("{:?}", e);
+            "failed to flush DNS"
+        })?;
     }
 
     Ok(())
 }
 
+pub fn validate_dns(primary: &str, secondary: &str) -> bool {
+    use std::net::IpAddr;
+
+    let p_ok = if primary.is_empty() {
+        true
+    } else {
+        primary.parse::<IpAddr>().is_ok()
+    };
+
+    let s_ok = if secondary.is_empty() {
+        true
+    } else {
+        secondary.parse::<IpAddr>().is_ok()
+    };
+
+    if !p_ok || !s_ok {
+        return false;
+    }
+
+    true
+}
 
 #[tauri::command]
 pub async fn resolve(dns_server: String) -> Result<u128, String> {

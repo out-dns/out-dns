@@ -20,7 +20,7 @@ export default function Support(){
     return(
         <div className="w-full h-full flex justify-between items-center flex-col p-5 gap-2">
             <div className="w-12/12 p-1.5 bg-[#1f2023] rounded-sm drop-shadow-2xl border border-[#2c2c2c] flex flex-col gap-2">
-                <p className="text-center">❤️ made with love and patience ❤️</p>
+                <p className="text-center">❤️ made with love and passion ❤️</p>
                 <div className="w-full overflow-hidden flex justify-center">
                     <img onClick={async()=>{openUrl("https://github.com/amirithm-dev/out-dns")}} src={Github} alt="github" className="w-fit h-14 bg-[#fcfcfc] rounded-full hover:scale-95 duration-200 ease-in-out cursor-pointer"/>
                 </div>

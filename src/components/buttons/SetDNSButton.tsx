@@ -21,9 +21,9 @@ export default function SetDNSButton({
             showPopup("success");
             log(`DNS applied for ${selectedInterface} ✅`);
         })
-        .catch(()=>{
+        .catch((error)=>{
             showPopup("warning");
-            log(`failed to apply DNS for ${selectedInterface} ❌`);
+            log(`${error} ❌`);
         });
 
     }

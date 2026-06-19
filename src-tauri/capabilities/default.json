@@ -16,6 +16,9 @@
     "core:window:allow-start-dragging",
     "core:app:allow-default-window-icon",
     "opener:allow-open-url",
-    "log:default"
+    "log:default",
+    "updater:allow-download-and-install",
+    "updater:allow-check",
+    "process:default"
   ]
 }

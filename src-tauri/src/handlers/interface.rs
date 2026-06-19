@@ -1,8 +1,8 @@
 use network_interface::{NetworkInterface, NetworkInterfaceConfig};
-use windows::Win32::NetworkManagement::IpHelper::*;
 use windows::core::{GUID, PCWSTR};
-use windows::Win32::System::Com::CLSIDFromString;
+use windows::Win32::NetworkManagement::IpHelper::*;
 use windows::Win32::Networking::WinSock::AF_UNSPEC;
+use windows::Win32::System::Com::CLSIDFromString;
 
 #[tauri::command]
 pub fn get_network_interfaces() -> Result<Vec<String>, String> {
@@ -30,7 +30,7 @@ pub fn get_interface_guid_by_name(friendly_name: &str) -> Result<GUID, String> {
         };
 
         match result {
-            0 => break, // ERROR_SUCCESS
+            0 => break,      // ERROR_SUCCESS
             111 => continue, // ERROR_BUFFER_OVERFLOW, buf_len updated, retry
             err => return Err(format!("GetAdaptersAddresses failed: {}", err)),
         }

@@ -1,7 +1,7 @@
-use std::{os::windows::process::CommandExt, process::Command};
-use serde::{Deserialize, Serialize};
-use tauri::Manager;
 use crate::handlers::database::DbState;
+use serde::{Deserialize, Serialize};
+use std::{os::windows::process::CommandExt, process::Command};
+use tauri::Manager;
 use tauri_plugin_log::log;
 #[derive(Serialize, Deserialize)]
 pub struct Configs {
@@ -37,7 +37,8 @@ pub fn set_flush_dns_on_change(
     state: tauri::State<DbState>,
 ) -> Result<String, String> {
     let db = state.0.lock().map_err(|e| e.to_string())?;
-    db.execute("
+    db.execute(
+        "
         UPDATE configs SET flush_dns_on_change = ?1 WHERE id = 1",
         [value as i32],
     )
@@ -49,7 +50,8 @@ pub fn set_flush_dns_on_change(
 #[tauri::command]
 pub fn set_autostart(value: bool, state: tauri::State<DbState>) -> Result<String, String> {
     let db = state.0.lock().map_err(|e| e.to_string())?;
-    db.execute("
+    db.execute(
+        "
         UPDATE configs SET autostart = ?1 WHERE id = 1",
         [value],
     )
@@ -60,11 +62,7 @@ pub fn set_autostart(value: bool, state: tauri::State<DbState>) -> Result<String
     let output = if value {
         Command::new("schtasks")
             .args([
-                "/create", 
-                "/tn", "out-dns", 
-                "/tr", &tr_arg, 
-                "/sc", "onlogon", 
-                "/rl", "highest",
+                "/create", "/tn", "out-dns", "/tr", &tr_arg, "/sc", "onlogon", "/rl", "highest",
                 "/f",
             ])
             .creation_flags(0x08000000)
@@ -88,7 +86,8 @@ pub fn set_autostart(value: bool, state: tauri::State<DbState>) -> Result<String
 #[tauri::command]
 pub fn set_minimize_to_tray(value: bool, state: tauri::State<DbState>) -> Result<String, String> {
     let db = state.0.lock().map_err(|e| e.to_string())?;
-    db.execute("
+    db.execute(
+        "
         UPDATE configs SET minimize_to_tray = ?1 WHERE id = 1",
         [value as i32],
     )
@@ -100,7 +99,8 @@ pub fn set_minimize_to_tray(value: bool, state: tauri::State<DbState>) -> Result
 #[tauri::command]
 pub fn set_close_to_tray(value: bool, state: tauri::State<DbState>) -> Result<String, String> {
     let db = state.0.lock().map_err(|e| e.to_string())?;
-    db.execute("
+    db.execute(
+        "
         UPDATE configs SET close_to_tray = ?1 WHERE id = 1",
         [value as i32],
     )
@@ -109,14 +109,15 @@ pub fn set_close_to_tray(value: bool, state: tauri::State<DbState>) -> Result<St
     Ok("successful".to_string())
 }
 
-
 #[tauri::command]
-pub fn open_log_folder(app: tauri::AppHandle) -> Result<(),()> {
-    let log_dir = app.path().app_log_dir().map_err(|e| {log::error!("{}", e)})?;
+pub fn open_log_folder(app: tauri::AppHandle) -> Result<(), ()> {
+    let log_dir = app.path().app_log_dir().map_err(|e| log::error!("{}", e))?;
     Command::new("explorer")
         .arg(log_dir)
         .output()
-        .map_err(|e| {log::error!("{}", e);})?;
+        .map_err(|e| {
+            log::error!("{}", e);
+        })?;
 
     Ok(())
 }
