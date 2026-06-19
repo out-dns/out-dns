@@ -1,19 +1,20 @@
 use network_interface::{NetworkInterface, NetworkInterfaceConfig};
+use tauri_plugin_log::log;
 use windows::core::{GUID, PCWSTR};
 use windows::Win32::NetworkManagement::IpHelper::*;
 use windows::Win32::Networking::WinSock::AF_UNSPEC;
 use windows::Win32::System::Com::CLSIDFromString;
 
 #[tauri::command]
-pub fn get_network_interfaces() -> Result<Vec<String>, String> {
-    let interfaces = NetworkInterface::show().map_err(|e| e.to_string())?;
+pub fn get_network_interfaces() -> Result<Vec<String>, ()> {
+    let interfaces = NetworkInterface::show().map_err(|e| log::error!("{:?}", e))?;
 
     let names = interfaces.iter().map(|i| i.name.clone()).collect();
 
     Ok(names)
 }
 
-pub fn get_interface_guid_by_name(friendly_name: &str) -> Result<GUID, String> {
+pub fn get_interface_guid_by_name(friendly_name: &str) -> Result<GUID, ()> {
     let mut buf_len: u32 = 15000; // MS-recommended starting size
     let mut buffer: Vec<u8>;
 
@@ -32,7 +33,10 @@ pub fn get_interface_guid_by_name(friendly_name: &str) -> Result<GUID, String> {
         match result {
             0 => break,      // ERROR_SUCCESS
             111 => continue, // ERROR_BUFFER_OVERFLOW, buf_len updated, retry
-            err => return Err(format!("GetAdaptersAddresses failed: {}", err)),
+            err => {
+                log::error!("{:?}", err);
+                return Err(());
+            }
         }
     }
 
@@ -42,20 +46,20 @@ pub fn get_interface_guid_by_name(friendly_name: &str) -> Result<GUID, String> {
         let adapter = unsafe { &*current };
 
         let name = unsafe { adapter.FriendlyName.to_string() }
-            .map_err(|e| format!("name decode error: {}", e))?;
+            .map_err(|e| log::error!("{:?}", e))?;
 
         if name == friendly_name {
             // AdapterName is a null-terminated ASCII string like "{GUID}"
             let guid_str = unsafe { adapter.AdapterName.to_string() }
-                .map_err(|e| format!("adapter name decode error: {}", e))?;
+                .map_err(|e| log::error!("{:?}", e))?;
             let wide: Vec<u16> = guid_str.encode_utf16().chain(std::iter::once(0)).collect();
             let guid = unsafe { CLSIDFromString(PCWSTR(wide.as_ptr())) }
-                .map_err(|e| format!("GUID parse error: {:?}", e))?;
+                .map_err(|e| log::error!("{:?}", e))?;
             return Ok(guid);
         }
 
         current = adapter.Next;
     }
 
-    Err(format!("Interface '{}' not found", friendly_name))
+    Err(())
 }

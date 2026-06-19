@@ -26,7 +26,7 @@ pub fn flush_dns() -> Result<(), ()> {
             .args(["/flushdns"])
             .creation_flags(0x08000000)
             .output()
-            .map_err(|_| {})?;
+            .map_err(|e| log::error!("{:?}", e))?;
     }
 
     #[cfg(target_os = "linux")]
@@ -34,7 +34,7 @@ pub fn flush_dns() -> Result<(), ()> {
         std::process::Command::new("systemctl")
             .args(["/restart", "systemd-resolved"])
             .output()
-            .map_err(|_| {})?;
+            .map_err(|e| log::error!("{:?}", e))?;
     }
 
     #[cfg(target_os = "macos")]
@@ -42,12 +42,12 @@ pub fn flush_dns() -> Result<(), ()> {
         std::process::Command::new("dscacheutil")
             .args(["-flushcache"])
             .output()
-            .map_err(|_| {})?;
+            .map_err(|e| log::error!("{:?}", e))?;
 
         std::process::Command::new("killall")
             .args(["-HUP", "mDNSResponder"])
             .output()
-            .map_err(|_| {})?;
+            .map_err(|e| log::error!("{:?}", e))?;
     }
 
     Ok(())
@@ -63,10 +63,10 @@ pub struct DnsEntries {
 }
 #[tauri::command]
 pub fn get_dns_from_db(state: tauri::State<DbState>) -> Result<Vec<DnsEntries>, ()> {
-    let db = state.0.lock().map_err(|e| log::error!("{}", e))?;
+    let db = state.0.lock().map_err(|e| log::error!("{:?}", e))?;
     let mut stmt = db
         .prepare("SELECT * FROM dns_entries ORDER BY display_order")
-        .map_err(|e| log::error!("{}", e))?;
+        .map_err(|e| log::error!("{:?}", e))?;
 
     let result = stmt
         .query_map([], |row| {
@@ -78,7 +78,7 @@ pub fn get_dns_from_db(state: tauri::State<DbState>) -> Result<Vec<DnsEntries>, 
                 display_order: row.get(4)?,
             })
         })
-        .map_err(|e| log::error!("{}", e))?
+        .map_err(|e| log::error!("{:?}", e))?
         .filter_map(|r| r.ok())
         .collect();
 
@@ -86,17 +86,17 @@ pub fn get_dns_from_db(state: tauri::State<DbState>) -> Result<Vec<DnsEntries>, 
 }
 
 #[tauri::command]
-pub fn remove_dns(id: i64, state: tauri::State<DbState>) -> Result<String, String> {
-    let db = state.0.lock().map_err(|e| e.to_string())?;
+pub fn remove_dns(id: i64, state: tauri::State<DbState>) -> Result<(), ()> {
+    let db = state.0.lock().map_err(|e| log::error!("{:?}", e))?;
     let row_affected = db
         .execute("DELETE FROM dns_entries WHERE id = ?1", params![id])
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| log::error!("{:?}", e))?;
 
     if row_affected == 0 {
-        return Err(format!("No record found with id {}", id));
+        return Err(());
     }
 
-    Ok(format!("Deleted record with id {}", id))
+    Ok(())
 }
 
 #[tauri::command]
@@ -105,28 +105,26 @@ pub fn new_dns(
     primary: String,
     secondary: String,
     state: tauri::State<'_, DbState>,
-) -> Result<bool, bool> {
-    let db = state.0.lock().map_err(|_| false)?;
+) -> Result<(), ()> {
+    let db = state.0.lock().map_err(|e| log::error!("{:?}", e))?;
     let mut display_order: i32 = db
-        .query_row(
-            "
-        SELECT COALESCE(MAX(display_order), 0) FROM dns_entries
-    ",
-            [],
+        .query_row("
+            SELECT COALESCE(MAX(display_order), 0) FROM dns_entries
+            ",[],
             |row| row.get(0),
         )
-        .map_err(|_| false)?;
+        .map_err(|e| log::error!("{:?}", e))?;
     display_order += 1;
     let row_inserted = db.execute("
         INSERT INTO dns_entries (name, primary_dns, secondary_dns, display_order) VALUES(?1, ?2, ?3, ?4)
         ", params![name, primary, secondary, display_order])
-    .map_err(|_|{false})?;
+    .map_err(|e| log::error!("{:?}", e))?;
 
     if row_inserted == 0 {
-        return Err(false);
+        return Err(());
     }
 
-    Ok(true)
+    Ok(())
 }
 
 #[tauri::command]
@@ -161,15 +159,9 @@ pub async fn set_dns(
     let mut failure: Vec<&str> = vec![];
 
     if interface == "All Networks" {
-        let interfaces = get_network_interfaces().map_err(|e| {
-            log::error!("{}", e);
-            e
-        })?;
+        let interfaces = get_network_interfaces().map_err(|e| {log::error!("{:?}", e); "failed to fetch interfaces"})?;
         for i in &interfaces {
-            let guid = get_interface_guid_by_name(i).map_err(|e| {
-                log::error!("{}", e);
-                e
-            })?;
+            let guid = get_interface_guid_by_name(i).map_err(|e| {log::error!("{:?}", e); "failed to get interface GUID"})?;
             let result = unsafe { SetInterfaceDnsSettings(guid, &settings) };
             if result.is_err() {
                 log::error!("failed to set dns error code: {:?}", result);
@@ -184,10 +176,7 @@ pub async fn set_dns(
             ));
         }
     } else {
-        let guid = get_interface_guid_by_name(interface).map_err(|e| {
-            log::error!("{}", e);
-            e
-        })?;
+        let guid = get_interface_guid_by_name(interface).map_err(|e| {log::error!("{:?}", e); "failed to get interface GUID"})?;
         let result = unsafe { SetInterfaceDnsSettings(guid, &settings) };
         if result.is_err() {
             log::error!("failed to set dns error code: {:?}", result);
@@ -196,15 +185,9 @@ pub async fn set_dns(
     }
 
     // flush dns on change based on app configuration
-    let configs: Configs = config::get_configs(state).map_err(|e| {
-        log::error!("{}", e);
-        e
-    })?;
+    let configs: Configs = config::get_configs(state).map_err(|e| {log::error!("{:?}", e); "failed to fetch configs"})?;
     if configs.flush_dns_on_change {
-        flush_dns().map_err(|e| {
-            log::error!("{:?}", e);
-            "failed to flush DNS"
-        })?;
+        flush_dns().map_err(|e| {log::error!("{:?}", e); "failed to flush DNS"})?;
     }
 
     Ok(())
