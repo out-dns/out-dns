@@ -92,7 +92,7 @@ export default function UpdateCenter(){
                     <p className="opacity-70">Current Version:</p>
                     <p>{currentVersion}</p>
                 </div>
-                <button onClick={check_for_update} className="p-2 bg-[#175cd3] rounded-full text-[#e0e0e0] border border-[#1f20239f] drop-shadow-2xl mr-3 drop-shadow-2xl active:scale-95 duration-100 ease-in-out overflow-hidden relative flex justify-center items-center">
+                <button onClick={check_for_update} className="p-2 bg-[#175cd3] rounded-full text-white border border-[#1f20239f] drop-shadow-2xl mr-3 drop-shadow-2xl active:scale-95 duration-100 ease-in-out overflow-hidden relative flex justify-center items-center">
                     <p className={(isChecking ? "opacity-0 " : "opacity-100 ") + "duration-300 ease-in-out w-full text-center pt-1"}>Check For Update</p>
                     <img src={spinningCircle} alt="checking" className={(isChecking ? "opacity-100 " : "opacity-0 ") + "rounded-full absolute w-16 h-16 duration-300 ease-in-out drop-shadow-2xl"}/>
                 </button>
