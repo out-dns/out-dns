@@ -42,7 +42,7 @@
     "updater": {
       "active": true,
       "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJDMjg3OUJFNEEzNkVDNDEKUldSQjdEWkt2bmtvTEpVU250MTlsNUhyL0dMZG1lMmdyZWZkUnRRcndWbmx6cFlYR2pyeFE2ZHQK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZCNzdFQzlGQTU1NjQ3QjYKUldTMlIxYWxuK3gzKzRyL3Z6TkROUVFaU2ZKSWNPeU4ydC83VGtMaDhTUndPSDZLU3UvYUNXTlYK",
       "endpoints": [
         "https://github.com/amirithm-dev/out-dns/releases/latest/download/latest.json"
       ]
