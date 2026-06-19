@@ -61,6 +61,6 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'out-dns ${{ github.ref_name }}'
           releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: false
+          releaseDraft: true
           prerelease: ${{ contains(github.ref_name, '-beta') }}
           args: ${{ matrix.args }}
