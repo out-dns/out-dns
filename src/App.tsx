@@ -44,7 +44,6 @@ function App() {
     }
   });
 
-
   return (
     <main className="bg-[#1f2023] overflow-hidden min-w-screen min-h-screen">
       <div className={(isElevated ? "opacity-0 pointer-events-none " : "opacity-100 pointer-events-auto ") + "w-full h-full z-50 fixed top-0 left-0 backdrop-blur duration-200 ease-in-out flex justify-center items-center"} onClick={()=>{setIsElevated(true)}}>

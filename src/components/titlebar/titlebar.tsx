@@ -37,14 +37,14 @@ export default function TitleBar(){
     }
 
     return(
-        <div className="titlebar fixed top-0 left-0 w-full h-6 bg-[#1f2023] overflow-hidden flex justify-end items-center select-none">
+        <div className="titlebar fixed top-0 left-0 w-full h-8 bg-[#1f2023] overflow-hidden flex justify-end items-center select-none">
             <div data-tauri-drag-region className="titlebar w-full h-full"></div>
             <p data-tauri-drag-region className="fixed top-1 left-1/2 -translate-x-1/2 text-[0.9rem] text-[#aaa]">Out DNS</p>
-            <button title="minimize" className="flex w-10 h-6 justify-center items-center hover:bg-[#363636] duration-200 ease-in-out group" onClick={minimize}>
-                <img src={minimizePNG} alt="minimize" className="w-3.5 h-3.5 group-active:scale-70 duration-200 ease-in-out" />
+            <button title="minimize" className="flex w-5 h-5 rounded-full justify-center items-center bg-[#373737] hover:bg-[#4b4b4b] duration-200 ease-in-out p-1 group" onClick={minimize}>
+                <img src={minimizePNG} alt="minimize" className="w-full h-full duration-500 ease-in-out invert group-hover:scale-x-60" />
             </button>
-            <button title="close" className="flex w-10 h-6 justify-center items-center hover:bg-red-800 duration-200 ease-in-out group" onClick={close}>
-                <img src={closePNG} alt="close" className="w-3.5 h-3.5 group-active:scale-70 duration-200 ease-in-out" />
+            <button title="close" className="flex w-5 h-5 rounded-full justify-center items-center bg-[#373737] hover:bg-[#812020] duration-200 ease-in-out p-1 ml-2 mr-2 group" onClick={close}>
+                <img src={closePNG} alt="close" className="w-full h-full duration-500 ease-in-out invert group-hover:rotate-90" />
             </button>
         </div>
     );
