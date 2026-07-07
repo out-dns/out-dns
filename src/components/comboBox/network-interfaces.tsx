@@ -9,7 +9,7 @@ export default function NetworkInterfaces({selectedInterface, setSelectedInterfa
 
 
     useEffect(()=>{
-        invoke<string[]>("get_network_interfaces").then((interfaces) => {
+        invoke<string[]>("get_interfaces").then((interfaces) => {
             setNetworkInterfaces(interfaces);
         });
     }, []);

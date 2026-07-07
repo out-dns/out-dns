@@ -15,7 +15,7 @@ export default function General(){
     const editConfigs = (config: configs)=>{
         switch (config) {
             case "clearCache":
-                invoke("set_flush_dns_on_change", {value: !clearCache})
+                invoke("toggle_flush_dns_on_change", {value: !clearCache})
                 .then(()=>{
                     setClearCache(prev => !prev);
                 })
@@ -24,7 +24,7 @@ export default function General(){
                 });
                 break;
             case "autostart":
-                invoke("set_autostart", {value: !autostart})
+                invoke("toggle_autostart", {value: !autostart})
                 .then(()=>{
                     setAutostart(prev => !prev);
                 })
@@ -33,7 +33,7 @@ export default function General(){
                 });
                 break;
             case "systemTrayOnClose":
-                invoke("set_close_to_tray", {value: !systemTrayOnClose})
+                invoke("toggle_close_to_tray", {value: !systemTrayOnClose})
                 .then(()=>{
                     setSystemTrayOnClose(prev => !prev);
                 })
@@ -42,7 +42,7 @@ export default function General(){
                 });
                 break;
             case "systemTrayOnMinimize":
-                invoke("set_minimize_to_tray", {value: !systemTrayOnMinimize})
+                invoke("toggle_minimize_to_tray", {value: !systemTrayOnMinimize})
                 .then(()=>{
                     setSystemTrayOnMinimize(prev => !prev);
                 })
@@ -130,8 +130,11 @@ export default function General(){
                     <input onChange={()=>{editConfigs("systemTrayOnMinimize")}} type="checkbox" name="systemTrayOnMinimize" id="systemTrayOnMinimize" hidden defaultChecked={systemTrayOnMinimize}/>
                 </label>
             </div>
-            <button onClick={open_log_folder} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-full duration-200 ease-in-out">
-                Open Log Folder
+            <button onClick={open_log_folder} className="w-40 h-10 bg-yellow-400 text-[#292929] rounded-full drop-shadow-2xl duration-100 ease-in-out group">
+                <div className="w-full h-full absolute overflow-hidden rounded-full backdrop-blur top-1 left-2 group-hover:top-0 group-hover:left-0 duration-200 border border-[#8181814f]">
+                    <div className="w-full h-full bg-[#ffee007d] blur-3xl"></div>
+                </div>
+                <span className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 w-full">Open Log Folder</span>
             </button>
         </div>
     );

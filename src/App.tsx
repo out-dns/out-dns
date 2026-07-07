@@ -12,7 +12,6 @@ import DnsList from "./components/comboBox/dns-servers";
 import { useLog } from "./contexts/logContext";
 import { usePopup } from "./contexts/popupContext";
 function App() {
-  const [isElevated, setIsElevated] = useState<boolean>(true);
   interface SelectedDns{
     name: string;
     primary: string;
@@ -45,10 +44,7 @@ function App() {
   });
 
   return (
-    <main className="bg-[#1f2023] overflow-hidden min-w-screen min-h-screen">
-      <div className={(isElevated ? "opacity-0 pointer-events-none " : "opacity-100 pointer-events-auto ") + "w-full h-full z-50 fixed top-0 left-0 backdrop-blur duration-200 ease-in-out flex justify-center items-center"} onClick={()=>{setIsElevated(true)}}>
-        <p className="bg-[#363636] rounded p-4 drop-shadow-2xl border border-[#ffbb002f] text-[#cecece] text-shadow-2xs text-[f5]">try to run with admin privilege!</p>
-      </div>
+    <main className="bg-[#1f2023] overflow-hidden min-w-screen min-h-screen rounded-lg drop-shadow-2xl outline-none">
 
       <TitleBar></TitleBar>
       <HMenu setMenuStatus={setMenuStatus}></HMenu>

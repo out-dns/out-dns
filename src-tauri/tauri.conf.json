@@ -13,13 +13,14 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 300,
+        "height": 250,
         "resizable": false,
         "title": "Out DNS",
         "width": 600,
         "center": true,
         "focus": true,
-        "decorations": false
+        "decorations": false,
+        "transparent": true
       }
     ],
     "security": {

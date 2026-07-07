@@ -22,7 +22,7 @@ export default function Support(){
             <div className="w-12/12 p-1.5 bg-[#1f2023] rounded-sm drop-shadow-2xl border border-[#2c2c2c] flex flex-col gap-2">
                 <p className="text-center">❤️ made with love and passion ❤️</p>
                 <div className="w-full overflow-hidden flex justify-center">
-                    <img onClick={async()=>{openUrl("https://github.com/amirithm-dev/out-dns")}} src={Github} alt="github" className="w-fit h-14 bg-[#fcfcfc] rounded-full hover:scale-95 duration-200 ease-in-out cursor-pointer"/>
+                    <img onClick={async()=>{openUrl("https://github.com/amirithm-dev/out-dns")}} src={Github} alt="github" className="w-fit max-w-44 h-14 bg-[#fcfcfc] rounded-full hover:scale-95 duration-200 ease-in-out cursor-pointer"/>
                 </div>
                 <p className="text-center">⭐ be sure to give star ⭐</p>
             </div>
@@ -31,7 +31,7 @@ export default function Support(){
                 <p>{walletAddress}</p>
                 <button onClick={()=>{writeToClipboard(walletAddress)}} className="absolute left-0 top-0 w-full h-full backdrop-blur-xl rounded-md text-[0.9rem] opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto pointer-events-none duration-300 ease-in-out">click to copy</button>
             </div>
-            <div className="flex gap-4 w-full items-center text-[0.9rem]">
+            <div className="flex gap-4 w-full items-center justify-center text-[0.9rem]">
                 <div onClick={async ()=>{writeToClipboard(walletAddress)}} className="bg-[#1f2023] rounded-md w-fit p-2 items-center border border-[#2c2c2c] drop-shadow-2xl flex gap-4 duration-300 ease-in-out hover:-translate-y-0.5 cursor-pointer">
                     <img src={TetherLogo} alt="tether" className="w-10 h-10 aspect-auto duration-200 hover:scale-[90%]"/>
                     <p className="self-center">donate via Tether</p>

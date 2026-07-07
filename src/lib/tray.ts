@@ -13,6 +13,8 @@ export default async function init_tray(
     const separator = await PredefinedMenuItem.new({item: "Separator"});
     const menu: Menu = await Menu.new({
         items: [
+            {id: 'show', text: 'Show', action: (id)=> menu_item_event(id, log, showPopup)},
+            separator,
             {id: 'set-to-dhcp', text: 'Set To DHCP', action: (id) => menu_item_event(id, log, showPopup)},
             {id: 'flush-dns', text: 'Flush DNS', action: (id) => menu_item_event(id, log, showPopup)},
             separator,
@@ -46,6 +48,10 @@ function menu_item_event(
     switch (item_id) {
         case 'quit':
             win.close();
+            break;
+        case 'show':
+            win.show();
+            win.unminimize();
             break;
         case 'flush-dns':
             log("processing... ⏳");
