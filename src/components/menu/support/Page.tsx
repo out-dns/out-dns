@@ -6,7 +6,7 @@ import Tron from "./../../../assets/Tron.png";
 
 import { useState } from 'react';
 
-export default function Support(){
+export default function Support({section}: {section: string}){
     const walletAddress = "TWKNGyaEP9tbt7M91QL7xUrLrNsMQsXBzB";
     const [isCopied, setIsCopied] = useState(false);
     const writeToClipboard = (content: string)=>{
@@ -18,7 +18,7 @@ export default function Support(){
     }
 
     return(
-        <div className="w-full h-full flex justify-between items-center flex-col p-5 gap-2">
+        <div className={(section == "support" ? "" : "translate-x-full opacity-0 ") + "absolute top-0 left-0 duration-300 w-full h-full flex justify-between items-center flex-col p-5 gap-2"}>
             <div className="w-12/12 p-1.5 bg-[#1f2023] rounded-sm drop-shadow-2xl border border-[#2c2c2c] flex flex-col gap-2">
                 <p className="text-center">❤️ made with love and passion ❤️</p>
                 <div className="w-full overflow-hidden flex justify-center">

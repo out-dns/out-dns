@@ -1,25 +1,11 @@
 import {Window } from "@tauri-apps/api/window";
 import closePNG from "./../../assets/close.png"
 import minimizePNG from "./../../assets/minimize.png"
-import { invoke } from "@tauri-apps/api/core";
+import { useConfig } from "../../contexts/configsContext";
 
-interface Configs{
-    id: number,
-    flush_dns_on_change: boolean,
-    run_on_start: boolean,
-    minimize_to_tray: boolean,
-    close_to_tray: boolean
-}
 export default function TitleBar(){
     const win = Window.getCurrent();
-    let configs: Configs;
-    invoke<Configs>("get_configs")
-    .then((result)=>{
-        configs = result;
-    })
-    .catch((e)=>{
-        console.log(e);
-    });
+    const {configs} = useConfig();
 
     const minimize = ()=>{
         if(configs.minimize_to_tray){

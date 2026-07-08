@@ -5,7 +5,7 @@ import { useLog } from "../../../contexts/logContext";
 import remove from './../../../assets/remove.png'
 import { usePopup } from "../../../contexts/popupContext";
 
-export default function DNS(){
+export default function DNS({section}: {section: string}){
     const { showPopup } = usePopup();
     const {log} = useLog();
     interface DnsEntry{
@@ -64,8 +64,8 @@ export default function DNS(){
     }
     
     return(
-        <div className="w-full h-full flex flex-col items-center p-5 gap-4">
-            <div className="w-full max-w-[25rem] h-36 rounded-md bg-[#1f2023] border border-[#2c2c2c] drop-shadow-2xl overflow-hidden relative overflow-x-hidden overflow-y-scroll scrollbar-none">
+        <div className={(section == "dns" ? "" : "translate-x-full opacity-0 ") + "absolute top-0 left-0 duration-300 w-full h-full flex flex-col items-center p-5 gap-4"}>
+            <div className="w-full max-w-100 h-36 rounded-md bg-[#1f2023] border border-[#2c2c2c] drop-shadow-2xl overflow-hidden relative overflow-x-hidden overflow-y-scroll scrollbar-none">
                 {dnsList.map((dns,i)=>{
                     return(
                         <div key={i} className="w-full h-fit flex flex-col truncate border-b border-b-[#00000041] p-1 group gap-2">

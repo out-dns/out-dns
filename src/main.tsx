@@ -4,13 +4,20 @@ import App from "./App";
 import "./App.css";
 import { LogProvider } from "./contexts/logContext";
 import { PopupProvider } from "./contexts/popupContext";
+import { ConfigProvider } from "./contexts/configsContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
+
     <PopupProvider>
       <LogProvider>
-        <App />
+        <ConfigProvider>
+
+          <App />
+          
+        </ConfigProvider>
       </LogProvider>
     </PopupProvider>
+
   </React.StrictMode>,
 );

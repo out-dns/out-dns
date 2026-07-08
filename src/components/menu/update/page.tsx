@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import spinningCircle from "./../../../assets/Edupia loading.gif";
 
-export default function UpdateCenter(){
+export default function UpdateCenter({section}: {section: string}){
     const [update, setUpdate] = useState<Update | null>(null);
 
     const [isChecking, setIsChecking] = useState<boolean>(false);
@@ -86,7 +86,7 @@ export default function UpdateCenter(){
     },[]);
 
     return(
-        <div className="w-full h-full p-5 flex flex-col justify-between items-center">
+        <div className={(section == "update" ? "" : "translate-x-full opacity-0 ") + "absolute top-0 left-0 duration-300 w-full h-full p-5 flex flex-col justify-between items-center"}>
             <div className="w-full min-h-16 bg-[#1f2023] rounded-full border border-[#00000041] drop-shadow-2xl overflow-hidden relative flex justify-between items-center">
                 <div className="flex justify-start items-center gap-2 text-[0.9rem] p-2">
                     <p className="opacity-70">Current Version:</p>

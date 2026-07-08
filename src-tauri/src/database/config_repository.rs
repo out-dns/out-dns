@@ -31,7 +31,7 @@ impl ConfigTypes {
 
 // get all configs list
 pub fn get(state: &DbState) -> Result<Configs, ()> {
-    let db = state.0.lock().map_err(|e|{log::error!("{}", e)})?;
+    let db = state.0.lock().map_err(|e|{log::error!("{e}")})?;
 
     let result = db.query_row("
         SELECT id, flush_dns_on_change, autostart, minimize_to_tray, close_to_tray FROM configs WHERE id = 1", 
@@ -39,12 +39,12 @@ pub fn get(state: &DbState) -> Result<Configs, ()> {
         |row| {
         Ok(Configs{
             id:                  row.get(0)?,
-            flush_dns_on_change: row.get(2)?,
-            autostart:           row.get(3)?,
-            minimize_to_tray:    row.get(4)?,
-            close_to_tray:       row.get(5)?,
+            flush_dns_on_change: row.get(1)?,
+            autostart:           row.get(2)?,
+            minimize_to_tray:    row.get(3)?,
+            close_to_tray:       row.get(4)?,
         })
-    }).map_err(|e|{log::error!("{}", e)})?;
+    }).map_err(|e|{log::error!("{e}")})?;
 
     Ok(result)
 }
@@ -52,11 +52,15 @@ pub fn get(state: &DbState) -> Result<Configs, ()> {
 pub fn update(state: &DbState, col: ConfigTypes, value: bool) -> Result<(), String> {
     let column = col.as_str();
 
-    let db = state.0.lock().map_err(|e|{log::error!("{}", e); e.to_string()})?;
+    let db = state.0.lock().map_err(|e|{log::error!("{e}"); e.to_string()})?;
 
     let query = format!("UPDATE configs SET {} = ?1 WHERE id = 1", column);
 
-    db.execute(&query,[value as i32]).map_err(|e|{log::error!("{}aaaa", e); e.to_string()})?;
+    let row = db.execute(&query,[value as i32]).map_err(|e|{log::error!("{e}"); e.to_string()})?;
 
-    Ok(())
+    if row == 0 {
+        Err(format!("{row} row was updated"))
+    }else {
+        Ok(())
+    }
 }

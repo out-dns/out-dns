@@ -206,7 +206,7 @@ pub fn enable_autostart() -> Result<(), ()> {
     let mut path = PathBuf::from(home);
     path.push(".config/autostart");
 
-    fs::create_dir_all(&path).map_err(|e| log::error!("{}", e))?;
+    fs::create_dir_all(&path).map_err(|e| log::error!("{e}"))?;
 
     path.push("out-dns.desktop");
 
@@ -223,7 +223,7 @@ pub fn enable_autostart() -> Result<(), ()> {
         exec_path
     );
 
-    fs::write(path, content).map_err(|e| log::error!("{}", e))?;
+    fs::write(path, content).map_err(|e| log::error!("{e}"))?;
 
     Ok(())
 }
@@ -232,7 +232,7 @@ pub fn disable_autostart() -> Result<(), ()> {
     let path = format!("{}/.config/autostart/out-dns.desktop", home);
 
     if std::path::Path::new(&path).exists() {
-        std::fs::remove_file(path).map_err(|e| log::error!("{}", e))?;
+        std::fs::remove_file(path).map_err(|e| log::error!("{e}"))?;
     }
 
     Ok(())
