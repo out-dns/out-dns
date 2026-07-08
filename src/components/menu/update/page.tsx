@@ -19,14 +19,22 @@ export default function UpdateCenter({section}: {section: string}){
 
     const [percent, setPercent] = useState<number>(0);
 
+    const [upToDate, setUpToDate] = useState<boolean>(false);
+
     const check_for_update = ()=>{
         setIsChecking(true);
         check()
         .then((update)=>{
+            if(update === null){
+                setUpToDate(true);
+                return(setTimeout(() => {
+                    setUpToDate(false);
+                }, 2000));
+            }
             setUpdate(update);
-            setCurrentVersion(update?.currentVersion);
-            setAvailableVersion(update?.version);
-            setUpdateDescription(update?.body);
+            setCurrentVersion(update.currentVersion);
+            setAvailableVersion(update.version);
+            setUpdateDescription(update.body);
         })
         .catch((error)=>{
             console.log(error);
@@ -36,6 +44,7 @@ export default function UpdateCenter({section}: {section: string}){
         });
 
     }
+
     const install_update = ()=>{
         setPercent(0);
         let contentLength: number = 1;
@@ -113,6 +122,12 @@ export default function UpdateCenter({section}: {section: string}){
                 </div>
 
                 <button onClick={install_update} className="absolute bottom-2 right-2 p-3 bg-[#1c7441] rounded-md text-[#dadada] drop-shadow-2xl active:scale-95 ease-in-out duration-300 translate-y-14 group-hover:translate-0">download and install</button>
+            </div>
+
+            {/* up to date */}
+            <div className={(upToDate ? "" : "translate-y-52 scale-0") + " duration-500 absolute w-45 h-10 -translate-y-1/2 top-1/2 -translate-x-1/2 left-1/2 rounded-md overflow-hidden backdrop-blur drop-shadow-2xl"}>
+                <div className="bg-[#00ff2ab4] w-full h-full rounded-md blur-xl"></div>
+                <p className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center z-10 text-[#ffffff] text-[0.9rem]">Up To Date</p>
             </div>
 
             {/* install screen */}

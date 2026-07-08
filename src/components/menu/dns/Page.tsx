@@ -94,8 +94,14 @@ export default function DNS({section}: {section: string}){
                     </div>
                 </div>
                 <div className="flex flex-col justify-end gap-2 font-[f1]">
-                    <button onClick={()=>{insert(dnsName, firstAddress, secondAddress)}} className="w-36 h-11 bg-[#2052a8] rounded-md text-center drop-shadow-2xl border border-[#1f20239f]">Add</button>
-                    <button onClick={()=>{setDnsName(""); setFirstAddress(""); setSecondAddress("")}} className="w-36 h-11 bg-[#2052a8] rounded-md text-center drop-shadow-2xl border border-[#1f20239f]">clear</button>
+                    <button onClick={()=>{insert(dnsName, firstAddress, secondAddress)}} className="w-36 h-11 bg-[#2052a8] rounded-md text-center drop-shadow-2xl border border-[#1f20239f] overflow-hidden group">
+                        <div className="absolute -top-5 -left-5 translate-y-full scale-0 translate-x-40 group-hover:scale-100 group-hover:translate-0 border-4 border-black bg-transparent rounded-full w-15 h-15 blur-xs duration-400"></div>
+                        <span>Add</span>
+                    </button>
+                    <button onClick={()=>{setDnsName(""); setFirstAddress(""); setSecondAddress("")}} className="w-36 h-11 bg-[#2052a8] rounded-md text-center drop-shadow-2xl border border-[#1f20239f] overflow-hidden group">
+                        <div className="absolute -top-5 -left-5 translate-y-full scale-0 translate-x-40 group-hover:scale-100 group-hover:translate-0 border-4 border-black bg-transparent rounded-full w-15 h-15 blur-xs duration-400"></div>
+                        <span>clear</span>
+                    </button>
                 </div>
             </div>
 
