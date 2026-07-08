@@ -1,31 +1,37 @@
+use std::env;
 use std::os::windows::process::CommandExt;
+use std::path::PathBuf;
+use std::process::Command;
+use tauri::Manager;
 use tauri_plugin_log::log;
 use windows::Win32::NetworkManagement::IpHelper::*;
 use windows::Win32::Networking::WinSock::AF_UNSPEC;
 use windows::Win32::System::Com::CLSIDFromString;
-use windows::core::{GUID, PCWSTR};
-use network_interface::{NetworkInterface, NetworkInterfaceConfig};
+use windows::core::{GUID, PCWSTR, PWSTR};
 
 
-use crate::handlers::config::Configs;
+use crate::database::config_repository::{Configs, get};
+use crate::database::db::DbState;
+use crate::platform::ConfigManager;
+use crate::services::interface_service::get_interfaces;
+
 use super::DnsManager;
 
 pub struct WindowsDns;
-pub struct WindowsInterface;
 
 impl DnsManager for WindowsDns {
     // flush dns to clear cache
-    fn flush_dns(&self) -> Result<(), ()> {
+    fn flush_dns(&self) -> Result<(), String> {
         std::process::Command::new("ipconfig")
             .args(["/flushdns"])
             .creation_flags(0x08000000)
             .output()
-            .map_err(|e| log::error!("{}", e))?;
+            .map_err(|e| {log::error!("{e}"); e.to_string()})?;
         
-            Ok(())
+        Ok(())
     }
     // set dns using windows api
-fn set_dns(&self, interface: &str, primary: &str, secondary: &str, state: tauri::State<DbState>) -> Result<(), String> {
+    fn set_dns(&self, interface: &str, primary: &str, secondary: &str, state: tauri::State<DbState>) -> Result<(), String> {
         let servers = if primary.is_empty() && secondary.is_empty() {
             String::new()
         } else if secondary.is_empty() {
@@ -46,33 +52,32 @@ fn set_dns(&self, interface: &str, primary: &str, secondary: &str, state: tauri:
         let mut failure: Vec<&str> = vec![];
 
         if interface == "All Networks" {
-            let interfaces = get_network_interfaces().map_err(|e| {log::error!("{:?}", e); "failed to fetch interfaces"})?;
+            let interfaces = get_interfaces().map_err(|e| {log::error!("{:?}", e); "failed to fetch interfaces"})?;
             for i in &interfaces {
-                let guid = get_interface_guid_by_name(i).map_err(|e| {log::error!("{}", e); "failed to get interface GUID"})?;
+                let guid = get_interface_guid_by_name(i).map_err(|e| {log::error!("{:?}", e); "failed to get interface GUID"})?;
                 let result = unsafe { SetInterfaceDnsSettings(guid, &settings) };
                 if result.is_err() {
-                    log::error!("failed to set dns error code: {}", result);
+                    log::error!("failed to set dns error code: {:?}", result);
                     failure.push(i);
                 }
             }
             if failure.len() > 0 {
                 return Err(format!(
-                    "set dns failed for {} times on {}",
-                    failure.len(),
+                    "set dns failed: {:?}",
                     failure
                 ));
             }
         } else {
-            let guid = get_interface_guid_by_name(interface).map_err(|e| {log::error!("{}", e); "failed to get interface GUID"})?;
+            let guid = get_interface_guid_by_name(interface).map_err(|e| {log::error!("{:?}", e); "failed to get interface GUID"})?;
             let result = unsafe { SetInterfaceDnsSettings(guid, &settings) };
             if result.is_err() {
-                log::error!("failed to set dns error code: {}", result);
+                log::error!("failed to set dns error code: {:?}", result);
                 return Err(format!("failed to set DNS for {}", interface));
             }
         }
 
         // flush dns on change based on app configuration
-        let configs: Configs = config::get_configs(state).map_err(|e| {log::error!("{}", e); "failed to fetch configs"})?;
+        let configs: Configs = get(&state).map_err(|e| {log::error!("{:?}", e); "failed to fetch configs"})?;
         if configs.flush_dns_on_change {
             self.flush_dns().map_err(|e| {log::error!("{:?}", e); "failed to flush DNS"})?;
         }
@@ -129,4 +134,74 @@ pub fn get_interface_guid_by_name(friendly_name: &str) -> Result<GUID, ()> {
     }
 
     Err(())
+}
+
+pub struct WindowsConfig;
+
+impl ConfigManager for WindowsConfig {
+    fn open_log_folder(&self, app: &tauri::AppHandle) -> Result<(), ()> {
+        let log_path = app.path().app_log_dir().map_err(|e|{log::error!("{e}")})?;
+        
+        Command::new("explorer")
+        .arg(log_path)
+        .spawn()
+        .map_err(|e| {log::error!("{e}")})?;
+
+        Ok(())
+    }
+    fn toggle_autostart(&self, value: bool) -> Result<(), ()> {
+        let exe_path = env::current_exe()
+        .map_err(|e| {log::error!("{e}")})?;
+
+
+        if value {
+            enable_autostart(&exe_path)
+        }else {
+            disable_autostart()
+        }
+    }
+}
+
+pub fn enable_autostart(exe_path: &PathBuf) -> Result<(), ()> {
+    let output = Command::new("schtasks")
+    .args([
+        "/Create",
+        "/TN",
+        "OutDNS",
+        "/SC",
+        "ONLOGON",
+        "/RL",
+        "HIGHEST",
+        "/F",
+    ])
+    .arg("/TR")
+    .arg(exe_path)
+    .creation_flags(0x08000000)
+    .status()
+    .map_err(|e| {log::error!("{e}")})?;
+
+    if output.success(){
+        Ok(())
+    }else {
+        Err(())
+    }
+
+}
+pub fn disable_autostart() -> Result<(), ()> {
+    let status = Command::new("schtasks")
+        .args([
+            "/Delete",
+            "/TN",
+            "OutDNS",
+            "/F",
+        ])
+        .creation_flags(0x08000000)
+        .status()
+        .map_err(|e|{log::error!("{e}")})?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(())
+    }
 }

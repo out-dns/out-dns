@@ -13,7 +13,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 250,
+        "height": 300,
         "resizable": false,
         "title": "Out DNS",
         "width": 600,
